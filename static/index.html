@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,15 +11,32 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid black;
             border-collapse: collapse;
             padding: 5px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
+        .high-confidence {
+            background-color: lightgreen;
+        }
+
+        .low-confidence {
+            background-color: salmon;
+        }
+
+        .med-confidence {
+            background-color: lightyellow;
+        }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -27,11 +45,45 @@
             border: none;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
+
+        #loader {
+            border: 5px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 5px solid #3498db;
+            width: 50px;
+            height: 50px;
+            -webkit-animation: spin 2s linear infinite;
+            /* Safari */
+            animation: spin 2s linear infinite;
+        }
+
+        /* Safari */
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
+
 <body>
     <h1>Model Prediction Interface</h1>
     <form id="predictionForm">
@@ -39,7 +91,7 @@
             <label for="file1">Upload CSV File 1:</label>
             <input type="file" id="file1" name="file1" accept=".csv">
         </div>
-        
+
         <div>
             <label for="samples">Enter Samples (comma-separated):</label>
             <input type="text" id="samples" name="samples">
@@ -49,26 +101,35 @@
 
     <h2>Results:</h2>
     <div id="resultsTable"></div>
+    <!-- Loader Element -->
+    <div id="loader" style="display: none;">Loading...</div>
 
     <script>
-        document.getElementById('predictionForm').addEventListener('submit', function(event) {
+        document.getElementById('predictionForm').addEventListener('submit', function (event) {
             event.preventDefault();
-    
+
+            // Show loader
+            document.getElementById('loader').style.display = 'block';
+
             var formData = new FormData();
             formData.append('file1', document.getElementById('file1').files[0]);
             formData.append('samples', document.getElementById('samples').value);
-    
+
             fetch('http://localhost:8000/predict/', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                displayResults(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loader
+                    document.getElementById('loader').style.display = 'none';
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Hide loader
+                    document.getElementById('loader').style.display = 'none';
+                });
         });
 
         function displayResults(data) {
@@ -77,16 +138,32 @@
             results.forEach((result, index) => {
                 table += `<tr>
                     <td>${index + 1}</td>
-                    <td>Class: ${result.RandomForest[0]}, Confidence: ${result.RandomForest[1].toFixed(2)}</td>
-                    <td>Class: ${result.LogisticRegression[0]}, Confidence: ${result.LogisticRegression[1].toFixed(2)}</td>
-                    <td>Class: ${result.SVC[0]}, Confidence: ${result.SVC[1].toFixed(2)}</td>
-                    <td>Class: ${result.GradientBoosting[0]}, Confidence: ${result.GradientBoosting[1].toFixed(2)}</td>
+                    ${formatResult(result.RandomForest)}
+                    ${formatResult(result.LogisticRegression)}
+                    ${formatResult(result.SVC)}
+                    ${formatResult(result.GradientBoosting)}
                 </tr>`;
             });
             table += '</table>';
             document.getElementById('resultsTable').innerHTML = table;
         }
+
+        function formatResult(result) {
+            let confidenceClass = '';
+            if (result[1] > 0.8) {
+                confidenceClass = 'high-confidence';
+            }
+            else if (result[1] > 0.5) {
+                confidenceClass = 'med-confidence';
+            }
+            else if (result[1] < 0.2) {
+                confidenceClass = 'low-confidence';
+            }
+
+            return `<td class="${confidenceClass}">Class: ${result[0]}, Confidence: ${result[1].toFixed(2)}</td>`;
+        }
     </script>
-    
+
 </body>
+
 </html>
