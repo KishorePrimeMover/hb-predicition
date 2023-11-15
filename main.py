@@ -80,7 +80,7 @@ async def predict(file1: UploadFile = File(...),samples: str = Form(...)):
         "Method1": rf_model,
         "Method2": lr_model,
         "Method3": svc_model,
-        "Method4    ": gbc_model
+        "Method4": gbc_model
     }
     # models = {
     #     "RandomForest": rf_model,
