@@ -77,11 +77,18 @@ async def predict(file1: UploadFile = File(...),samples: str = Form(...)):
     # Train the models
     rf_model, lr_model, svc_model, gbc_model = train_models(combined_df)
     models = {
-        "RandomForest": rf_model,
-        "LogisticRegression": lr_model,
-        "SVC": svc_model,
-        "GradientBoosting": gbc_model
+        "Method1": rf_model,
+        "Method2": lr_model,
+        "Method3": svc_model,
+        "Method4    ": gbc_model
     }
+    # models = {
+    #     "RandomForest": rf_model,
+    #     "LogisticRegression": lr_model,
+    #     "SVC": svc_model,
+    #     "GradientBoosting": gbc_model
+    # }
+
 
     # Get predictions
     predictions = predict_with_confidence(models, samples_array)
