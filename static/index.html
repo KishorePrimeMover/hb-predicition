@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Model Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Model Prediction Interface</h1>
+    <form id="predictionForm">
+        <div>
+            <label for="file1">Upload CSV File 1:</label>
+            <input type="file" id="file1" name="file1" accept=".csv">
+        </div>
+        
+        <div>
+            <label for="samples">Enter Samples (comma-separated):</label>
+            <input type="text" id="samples" name="samples">
+        </div>
+        <button type="submit">Predict</button>
+    </form>
+
+    <h2>Results:</h2>
+    <div id="resultsTable"></div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+    
+            var formData = new FormData();
+            formData.append('file1', document.getElementById('file1').files[0]);
+            formData.append('samples', document.getElementById('samples').value);
+    
+            fetch('http://localhost:8000/predict/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        function displayResults(data) {
+            var results = data.predictions;
+            var table = '<table><tr><th>Sample</th><th>RandomForest</th><th>LogisticRegression</th><th>SVC</th><th>GradientBoosting</th></tr>';
+            results.forEach((result, index) => {
+                table += `<tr>
+                    <td>${index + 1}</td>
+                    <td>Class: ${result.RandomForest[0]}, Confidence: ${result.RandomForest[1].toFixed(2)}</td>
+                    <td>Class: ${result.LogisticRegression[0]}, Confidence: ${result.LogisticRegression[1].toFixed(2)}</td>
+                    <td>Class: ${result.SVC[0]}, Confidence: ${result.SVC[1].toFixed(2)}</td>
+                    <td>Class: ${result.GradientBoosting[0]}, Confidence: ${result.GradientBoosting[1].toFixed(2)}</td>
+                </tr>`;
+            });
+            table += '</table>';
+            document.getElementById('resultsTable').innerHTML = table;
+        }
+    </script>
+    
+</body>
+</html>
