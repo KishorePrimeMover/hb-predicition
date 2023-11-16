@@ -44,6 +44,7 @@ def predict_with_confidence(models, samples):
             sample = np.array([[sample]])
 
         sample_results = {}
+        i=0
         for model_name, model in models.items():
             # Predict class probabilities
             probabilities = model.predict_proba(sample)
@@ -53,7 +54,8 @@ def predict_with_confidence(models, samples):
             predicted_class = model.classes_[max_prob_index]
             confidence = probabilities[0, max_prob_index]
 
-            sample_results[model_name] = (sample,predicted_class[0], confidence[0]*100)
+            sample_results[model_name] = (sample[i],predicted_class[0], confidence[0]*100)
+            i+=1
 
         results.append(sample_results)
 
