@@ -53,7 +53,7 @@ def predict_with_confidence(models, samples):
             predicted_class = model.classes_[max_prob_index]
             confidence = probabilities[0, max_prob_index]
 
-            sample_results[model_name] = (predicted_class[0], confidence[0])
+            sample_results[model_name] = (sample,predicted_class[0], confidence[0]*100)
 
         results.append(sample_results)
 
