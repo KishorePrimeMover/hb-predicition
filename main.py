@@ -5,12 +5,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import GradientBoostingClassifier
-
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import Pipeline
 from io import StringIO
 import numpy as np
 from fastapi.staticfiles import StaticFiles
 
-app = FastAPI()
+app = FastAPI(debug=True)
 # Mount the static directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -24,16 +25,16 @@ def train_models(data: pd.DataFrame):
 
     # Train different models
     rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-    lr_model = LogisticRegression(random_state=42)
+    
     svc_model = SVC(probability=True, random_state=42)
     gbc_model = GradientBoostingClassifier(random_state=42)
 
     rf_model.fit(X, y)
-    lr_model.fit(X, y)
+    
     svc_model.fit(X, y)
     gbc_model.fit(X, y)
 
-    return rf_model, lr_model, svc_model, gbc_model
+    return rf_model, svc_model, gbc_model
 
 
 def predict_with_confidence(models, samples):
@@ -44,7 +45,7 @@ def predict_with_confidence(models, samples):
             sample = np.array([[sample]])
 
         sample_results = {}
-        i=0
+        
         for model_name, model in models.items():
             # Predict class probabilities
             probabilities = model.predict_proba(sample)
@@ -53,9 +54,8 @@ def predict_with_confidence(models, samples):
             max_prob_index = np.argmax(probabilities, axis=1)
             predicted_class = model.classes_[max_prob_index]
             confidence = probabilities[0, max_prob_index]
-
-            sample_results[model_name] = (sample[i],predicted_class[0], confidence[0]*100)
-            i+=1
+            
+            sample_results[model_name] = (sample[0][0],predicted_class[0], confidence[0])
 
         results.append(sample_results)
 
@@ -77,12 +77,12 @@ async def predict(file1: UploadFile = File(...),samples: str = Form(...)):
     combined_df = pd.concat([df1], ignore_index=True)
 
     # Train the models
-    rf_model, lr_model, svc_model, gbc_model = train_models(combined_df)
+    rf_model, svc_model, gbc_model = train_models(combined_df)
     models = {
         "Method1": rf_model,
-        "Method2": lr_model,
-        "Method3": svc_model,
-        "Method4": gbc_model
+        
+        "Method2": svc_model,
+        "Method3": gbc_model
     }
     # models = {
     #     "RandomForest": rf_model,

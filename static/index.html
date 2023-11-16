@@ -115,7 +115,7 @@
             formData.append('file1', document.getElementById('file1').files[0]);
             formData.append('samples', document.getElementById('samples').value);
 
-            fetch('https://hb-predicition-production.up.railway.app/predict/', {
+            fetch('http://localhost:8000/predict/', {
                 method: 'POST',
                 body: formData
             })
@@ -134,15 +134,16 @@
 
         function displayResults(data) {
             var results = data.predictions;
-            var table = '<table><tr><th>Sample</th><th>Method1</th><th>Method2</th><th>Method3</th><th>Method4</th></tr>';
+            var table = '<table><tr><th>SlNo.</th><th>Sample</th><th>Method1</th><th>Method2</th><th>Method3</th></tr>';
             results.forEach((result, index) => {
+                console.log(result)
                 table += `<tr>
                     <td>${index + 1}</td>
-                    <td>$result.sample$</td>
+                    <td>${result.Method1[0]}</td>
                     ${formatResult(result.Method1)}
                     ${formatResult(result.Method2)}
                     ${formatResult(result.Method3)}
-                    ${formatResult(result.Method4)}
+                    
                 </tr>`;
             });
             table += '</table>';
@@ -161,7 +162,7 @@
                 confidenceClass = 'low-confidence';
             }
 
-            return `<td class="${confidenceClass}">Class: ${result[0]}, Confidence: ${result[1].toFixed(2)}</td>`;
+            return `<td class="${confidenceClass}">Class: ${result[1]}, Confidence: ${result[2].toFixed(2)}</td>`;
         }
     </script>
 
