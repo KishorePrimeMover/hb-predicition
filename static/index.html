@@ -115,7 +115,7 @@
             formData.append('file1', document.getElementById('file1').files[0]);
             formData.append('samples', document.getElementById('samples').value);
 
-            fetch('http://localhost:8000/predict/', {
+            fetch('https://hb-predicition-production.up.railway.app/predict/', {
                 method: 'POST',
                 body: formData
             })
