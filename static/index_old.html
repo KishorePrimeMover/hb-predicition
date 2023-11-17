@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Model Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .high-confidence {
+            background-color: lightgreen;
+        }
+
+        .low-confidence {
+            background-color: salmon;
+        }
+
+        .med-confidence {
+            background-color: lightyellow;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #loader {
+            border: 5px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 5px solid #3498db;
+            width: 50px;
+            height: 50px;
+            -webkit-animation: spin 2s linear infinite;
+            /* Safari */
+            animation: spin 2s linear infinite;
+        }
+
+        /* Safari */
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Model Prediction Interface</h1>
+    <form id="predictionForm">
+        <div>
+            <label for="file1">Upload CSV File 1:</label>
+            <input type="file" id="file1" name="file1" accept=".csv">
+        </div>
+
+        <div>
+            <label for="samples">Enter Samples (comma-separated):</label>
+            <input type="text" id="samples" name="samples">
+        </div>
+        <button type="submit">Predict</button>
+    </form>
+
+    <h2>Results:</h2>
+    <div id="resultsTable"></div>
+    <!-- Loader Element -->
+    <div id="loader" style="display: none;">Loading...</div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Show loader
+            document.getElementById('loader').style.display = 'block';
+
+            var formData = new FormData();
+            formData.append('file1', document.getElementById('file1').files[0]);
+            formData.append('samples', document.getElementById('samples').value);
+
+            fetch('https://hb-predicition-production.up.railway.app/predict/', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loader
+                    document.getElementById('loader').style.display = 'none';
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Hide loader
+                    document.getElementById('loader').style.display = 'none';
+                });
+        });
+
+        function displayResults(data) {
+            var results = data.predictions;
+            var table = '<table><tr><th>SlNo.</th><th>Sample</th><th>Method1</th><th>Method2</th><th>Method3</th></tr>';
+            results.forEach((result, index) => {
+                console.log(result)
+                table += `<tr>
+                    <td>${index + 1}</td>
+                    <td>${result.Method1[0]}</td>
+                    ${formatResult(result.Method1)}
+                    ${formatResult(result.Method2)}
+                    ${formatResult(result.Method3)}
+                    
+                </tr>`;
+            });
+            table += '</table>';
+            document.getElementById('resultsTable').innerHTML = table;
+        }
+
+        function formatResult(result) {
+            let confidenceClass = '';
+            if (result[1] > 0.8) {
+                confidenceClass = 'high-confidence';
+            }
+            else if (result[1] > 0.5) {
+                confidenceClass = 'med-confidence';
+            }
+            else if (result[1] < 0.2) {
+                confidenceClass = 'low-confidence';
+            }
+
+            return `<td class="${confidenceClass}">Class: ${result[1]}, Confidence: ${result[2].toFixed(2)}</td>`;
+        }
+    </script>
+
+</body>
+
+</html>

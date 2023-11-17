@@ -6,109 +6,197 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predictive Model Interface</title>
+    <!-- Bootstrap CSS CDN Link -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
     <style>
+       
+        /* .bg-dark {
+            background-color: #b0b7bd !important;
+        } */
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 20px;
         }
 
-        table,
-        th,
-        td {
-            border: 1px solid black;
-            border-collapse: collapse;
-            padding: 5px;
-            text-align: left;
+        .navbar-brand img {
+            height: 70px;
         }
 
-        th {
-            background-color: #f2f2f2;
+        .content {
+            margin-top: 30px;
         }
 
-        .high-confidence {
-            background-color: lightgreen;
-        }
+        .results-table {
+        margin-top: 20px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+    }
 
-        .low-confidence {
-            background-color: salmon;
-        }
+    .results-table table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
 
-        .med-confidence {
-            background-color: lightyellow;
-        }
+    .results-table .table th,
+    .results-table .table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
 
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            margin: 10px 0;
-            border: none;
+
+    .high-confidence {
+        background-color: lightgreen;
+    }
+
+    .med-confidence {
+        background-color: lightyellow;
+    }
+
+    .low-confidence {
+        background-color: salmon;
+    }
+
+        .custom-file-input {
+            overflow: hidden;
+            position: relative;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: #45a049;
+        .custom-file-input input[type="file"] {
+            display: block;
+            position: absolute;
+            top: 0;
+            right: 0;
+            opacity: 0;
+            font-size: 100px;
+            cursor: pointer;
         }
 
-        #loader {
-            border: 5px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 5px solid #3498db;
-            width: 50px;
-            height: 50px;
-            -webkit-animation: spin 2s linear infinite;
-            /* Safari */
-            animation: spin 2s linear infinite;
+        .remove-file {
+            display: none;
+            color: red;
+            cursor: pointer;
+            padding-left: 5px;
+            padding-top: 5px;
         }
-
-        /* Safari */
-        @-webkit-keyframes spin {
-            0% {
-                -webkit-transform: rotate(0deg);
-            }
-
-            100% {
-                -webkit-transform: rotate(360deg);
-            }
+        .card h1 {
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            font-size: 2em;
+            font-weight: 700; /* Adjust font-weight if needed */
         }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+        .card {
+            margin-top: 50px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
         }
+        .custom-file-input::placeholder {
+    font-size: 12px;
+}
+
+@media (max-width: 576px) {
+    .custom-file-input::placeholder {
+        display: none;
+    }
+
+    .custom-file-input::after {
+        content: ".csv";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #495057;
+        pointer-events: none;
+        font-size: 12px;
+    }
+}
     </style>
 </head>
 
 <body>
-    <h1>Model Prediction Interface</h1>
-    <form id="predictionForm">
-        <div>
-            <label for="file1">Upload CSV File 1:</label>
-            <input type="file" id="file1" name="file1" accept=".csv">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" href="https://primemoversolutions.in/">
+                    <img src="https://primemoversolutions.in/assets/images/navbar-logo.svg" alt="Company Logo">
+                </a>
+        
+                <div class="navbar-nav ml-auto">
+                    <span style="--color_15: 0,0,0; --font_6: normal normal bold 30px/1.35em HelveticaNeue,Helvetica Neue,helvetica,Sans-Serif; text-decoration: none;" class="wixui-rich-text__text">
+                        <a href="https://www.edhaainnovations.com" target="_self" style="text-decoration:none; color: rgb(var(--color_15)); font: var(--font_6);" class="nav-item nav-link">Edhaa Innovations</a>
+                    </span>
+                </div>
+                
+            </div>
+        </nav>
+        
+        
+    </header>
+
+    <main class="container">
+        <div class="content">
+            <div class="card">
+                <h1 class="text-center" >Concentration Prediction Interface</h1>
+                <form id="predictionForm">
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="file1">Upload the Standard Concentration reading File:</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" id="file1" name="file1" class="custom-file-input" accept=".csv">
+                                        <label class="custom-file-label" for="file1">Choose .csv file</label>
+                                    </div>
+                                    
+                                    
+                                    <div class="input-group-append">
+                                        <span class="remove-file">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- <span id="selectedFileName" class="selected-file"></span> -->
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="samples">Enter Unknown Samples (comma-separated):</label>
+                                <input type="text" id="samples" name="samples" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary">Predict</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="results-table">
+                <div id="loader" class="text-center" style="display: none;">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <div id="resultsTable"></div>
+            </div>
         </div>
+    </main>
 
-        <div>
-            <label for="samples">Enter Samples (comma-separated):</label>
-            <input type="text" id="samples" name="samples">
-        </div>
-        <button type="submit">Predict</button>
-    </form>
-
-    <h2>Results:</h2>
-    <div id="resultsTable"></div>
-    <!-- Loader Element -->
-    <div id="loader" style="display: none;">Loading...</div>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         document.getElementById('predictionForm').addEventListener('submit', function (event) {
             event.preventDefault();
-
-            // Show loader
             document.getElementById('loader').style.display = 'block';
 
             var formData = new FormData();
@@ -121,51 +209,70 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Hide loader
                     document.getElementById('loader').style.display = 'none';
                     displayResults(data);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // Hide loader
                     document.getElementById('loader').style.display = 'none';
                 });
         });
 
         function displayResults(data) {
             var results = data.predictions;
-            var table = '<table><tr><th>SlNo.</th><th>Sample</th><th>Method1</th><th>Method2</th><th>Method3</th></tr>';
+            var table = '<table class="table"><tr><th>SlNo.</th><th>Sample</th><th>Method1</th><th>Method2</th><th>Method3</th></tr>';
             results.forEach((result, index) => {
-                console.log(result)
+                var confidenceClass = '';
+                if (result[1] > 0.8) {
+                    confidenceClass = 'high-confidence';
+                } else if (result[1] > 0.5) {
+                    confidenceClass = 'med-confidence';
+                } else if (result[1] < 0.2) {
+                    confidenceClass = 'low-confidence';
+                }
                 table += `<tr>
-                    <td>${index + 1}</td>
-                    <td>${result.Method1[0]}</td>
-                    ${formatResult(result.Method1)}
-                    ${formatResult(result.Method2)}
-                    ${formatResult(result.Method3)}
-                    
-                </tr>`;
+                        <td>${index + 1}</td>
+                        <td>${result.Method1[0]}</td>
+                        ${formatResult(result.Method1, confidenceClass)}
+                        ${formatResult(result.Method2, confidenceClass)}
+                        ${formatResult(result.Method3, confidenceClass)}
+                    </tr>`;
             });
             table += '</table>';
             document.getElementById('resultsTable').innerHTML = table;
         }
 
-        function formatResult(result) {
-            let confidenceClass = '';
-            if (result[1] > 0.8) {
-                confidenceClass = 'high-confidence';
-            }
-            else if (result[1] > 0.5) {
-                confidenceClass = 'med-confidence';
-            }
-            else if (result[1] < 0.2) {
-                confidenceClass = 'low-confidence';
-            }
-
+        function formatResult(result, confidenceClass) {
             return `<td class="${confidenceClass}">Class: ${result[1]}, Confidence: ${result[2].toFixed(2)}</td>`;
         }
-    </script>
 
+        document.getElementById('file1').addEventListener('change', function () {
+            const fileName = this.files[0].name;
+            document.querySelector('.custom-file-label').textContent = fileName;
+            document.querySelector('.remove-file').style.display = 'inline-block';
+            document.getElementById('selectedFileName').textContent = fileName;
+        });
+
+        document.querySelector('.remove-file').addEventListener('click', function () {
+            document.getElementById('file1').value = '';
+            document.querySelector('.custom-file-label').textContent = 'Choose file';
+            document.querySelector('.remove-file').style.display = 'none';
+            document.getElementById('selectedFileName').textContent = '';
+        });
+
+        document.getElementById('file1').addEventListener('change', function () {
+            const hasFile = this.files.length > 0;
+            document.querySelector('.custom-file-label').textContent = hasFile ? this.files[0].name : 'Choose file';
+            const removeButton = document.querySelector('.remove-file');
+            if (hasFile) {
+                removeButton.style.display = 'inline-block';
+                removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Replace with the trash/delete icon
+            } else {
+                removeButton.style.display = 'none';
+            }
+        });
+
+    </script>
 </body>
 
 </html>
