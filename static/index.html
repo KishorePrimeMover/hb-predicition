@@ -250,9 +250,9 @@
             results.forEach((result, index) => {
                 table += `<tr>
                     <td>${index + 1}</td>
-                    <td>${result.Method1 ? result.Method1[0] : 'N/A'}</td>
+                    <td>${result.RF_Classifier ? result.RF_Classifier[0] : 'N/A'}</td>
                     ${formatClassifierResult(result.RF_Classifier)}
-                    ${formatClassifierResult(result.SVR_Regressor)}
+                    ${formatClassifierResult(result.SVR_Classifier)}
                     ${formatClassifierResult(result.GBC_Classifier)}
                     ${formatRegressorResult(result.RF_Regressor)}
                     ${formatRegressorResult(result.SVR_Regressor)}
