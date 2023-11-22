@@ -20,8 +20,11 @@
             display: flex;
             justify-content: center;
         }
-        th{background-color:rgb(105, 105, 108);
-        color:white}
+
+        th {
+            background-color: rgb(105, 105, 108);
+            color: white
+        }
 
 
         body {
@@ -203,7 +206,7 @@
                     </div>
                 </div>
                 <div id="resultsTable" class="table-container">
-                    
+
                 </div>
 
             </div>
@@ -221,7 +224,10 @@
             var formData = new FormData();
             formData.append('file1', document.getElementById('file1').files[0]);
             formData.append('samples', document.getElementById('samples').value);
-
+            //railwayapp
+            //https://hb-predicition-production.up.railway.app/predict/
+            //localhost
+            //http://localhost:8000/predict/
             fetch('https://hb-predicition-production.up.railway.app/predict/', {
                 method: 'POST',
                 body: formData
@@ -238,39 +244,52 @@
         });
 
         function displayResults(data) {
+            console.log(data); // Debugging line to inspect the data structure
             var results = data.predictions;
-            var table = '<table class="table"><tr><th>#</th><th>Sample</th><th>Method1</th><th>Method2</th><th>Method3</th></tr>';
+            var table = '<table class="table"><tr><th>#</th><th>Sample</th><th>Method1_discrete</th><th>Method2_discrete</th><th>Method3_discrete</th><th>Method1_Continous</th><th>Method2_Continous</th><th>Method3_Continous</th></tr>';
             results.forEach((result, index) => {
-
                 table += `<tr>
-                        <td>${index + 1}</td>
-                        <td>${result.Method1[0]}</td>
-                        ${formatResult(result.Method1)}
-                        ${formatResult(result.Method2)}
-                        ${formatResult(result.Method3)}
-                    </tr>`;
+                    <td>${index + 1}</td>
+                    <td>${result.Method1 ? result.Method1[0] : 'N/A'}</td>
+                    ${formatClassifierResult(result.RF_Classifier)}
+                    ${formatClassifierResult(result.SVR_Regressor)}
+                    ${formatClassifierResult(result.GBC_Classifier)}
+                    ${formatRegressorResult(result.RF_Regressor)}
+                    ${formatRegressorResult(result.SVR_Regressor)}
+                    ${formatRegressorResult(result.GBR_Regressor)}
+                </tr>`;
             });
             table += '</table>';
             document.getElementById('resultsTable').innerHTML = table;
         }
 
-        function formatResult(result, methodIndex) {
+        function formatClassifierResult(result) {
+            if (!result) return '<td>N/A</td>';
             let confidenceClass = '';
-            // if (methodIndex === 1 && result[2] < 0.8) {
-            //     confidenceClass = 'low-confidence';
-            // }
             if (result[2] > 0.8) {
                 confidenceClass = 'high-confidence';
-            }
-            else if (result[2] > 0.5) {
+            } else if (result[2] > 0.5) {
                 confidenceClass = 'med-confidence';
-            }
-            else if (result[2] < 0.2) {
+            } else if (result[2] < 0.2) {
                 confidenceClass = 'low-confidence';
             }
-
-            return `<td class="${confidenceClass}">Std Con: ${result[1]}, Confidence: ${(result[2] * 100).toFixed(2)}%</td>`;
+            return `<td class="${confidenceClass}">Class: ${result[1]}, Confidence: ${(result[2] * 100).toFixed(2)}%</td>`;
         }
+
+        function formatRegressorResult(result) {
+            if (!result) return '<td>N/A</td>';
+            let confidenceClass = '';
+            if (result[2] > 0.8) {
+                confidenceClass = 'high-confidence';
+            } else if (result[2] > 0.5) {
+                confidenceClass = 'med-confidence';
+            } else if (result[2] < 0.2) {
+                confidenceClass = 'low-confidence';
+            }
+            return `<td class="${confidenceClass}">Class: ${result[1]}, Confidence: ${(result[2] * 100).toFixed(2)}%</td>`;
+        }
+
+
 
         document.getElementById('file1').addEventListener('change', function () {
             const fileName = this.files[0].name;
