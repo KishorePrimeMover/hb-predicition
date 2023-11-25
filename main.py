@@ -33,7 +33,7 @@ def predict_label(data: pd.DataFrame, model, samples):
         # Directly predict the continuous value
         predicted_value = model.predict(sample)
         # Convert NumPy types to Python native types for JSON serialization
-        sample_results = {"GradientBoostingRegressor": predicted_value[0].item()}
+        sample_results = {"Method3": predicted_value[0].item()}
         results.append(sample_results)
 
     return results

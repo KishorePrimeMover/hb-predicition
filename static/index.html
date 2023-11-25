@@ -302,12 +302,12 @@
             var table = '<table class="table"><tr><th>#</th><th>Sample</th><th>Result</th></tr>'; // Adjusted table headers
             results.forEach((result, index) => {
                 // Extracting the result for Method3 (GradientBoostingRegressor)
-                const method3Result = result.GBR_Regressor ? result.GBR_Regressor[1] : 'N/A'; // [1] is the predicted value
+                const method3Result = result.Method3 ? result.Method3[1] : 'N/A'; // [1] is the predicted value
 
                 // Build table row with data
                 table += `<tr>
                 <td>${index + 1}</td>
-                <td class="sample-field">${result.GBR_Regressor ? result.GBR_Regressor[0] : 'N/A'}</td>
+                <td class="sample-field">${result.Method3 ? result.Method3[0] : 'N/A'}</td>
                 <td class="highValue">${parseFloat(method3Result).toFixed(2)}</td>
             </tr>`;
             });
