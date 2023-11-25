@@ -26,6 +26,12 @@
             color: white
         }
 
+        .small-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+            /* Adjust color if needed */
+        }
 
         body {
             font-family: 'Roboto', sans-serif;
@@ -62,11 +68,11 @@
 
 
         .high-confidence {
-            background-color: lightgreen;
+            color: #04cd04;
         }
 
         .med-confidence {
-            background-color: lightyellow;
+            color: red;
         }
 
         .low-confidence {
@@ -114,6 +120,49 @@
 
         .custom-file-input::placeholder {
             font-size: 12px;
+        }
+
+        .percentage {
+            top: 35px;
+            right: -62px;
+            font-size: 13px;
+            position: relative;
+        }
+
+
+        .class-label {
+            font-size: 12px;
+            position: relative;
+            top: 10px;
+            left: -70px;
+        }
+
+        .big-number {
+            font-size: 18px;
+            /* font-weight: bold; */
+            position: relative;
+            bottom: -24px;
+        }
+
+        .std-label {
+            color: #727272;
+            font-size: 14px;
+        }
+
+        .highValue {
+            color: green;
+         font-weight: bolder;
+            font-size: larger;
+            position: relative;
+            font-size: 28px;
+            top: 25px
+        }
+
+        .sample-field {
+            font-size: 24px;
+            font-weight: bold;
+            position: relative;
+            bottom: -24px;
         }
 
         @media (max-width: 576px) {
@@ -210,6 +259,10 @@
                 </div>
 
             </div>
+            <!-- <div id="printButton" style="display: none;">
+                <button id="printTableButton" class="btn btn-primary">Print Table</button>
+            </div> -->
+
         </div>
     </main>
 
@@ -217,6 +270,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+       
         document.getElementById('predictionForm').addEventListener('submit', function (event) {
             event.preventDefault();
             document.getElementById('loader').style.display = 'block';
@@ -244,52 +298,65 @@
         });
 
         function displayResults(data) {
-            console.log(data); // Debugging line to inspect the data structure
             var results = data.predictions;
-            var table = '<table class="table"><tr><th>#</th><th>Sample</th><th>Method1_discrete</th><th>Method2_discrete</th><th>Method3_discrete</th><th>Method1_Continous</th><th>Method2_Continous</th><th>Method3_Continous</th></tr>';
+            var table = '<table class="table"><tr><th>#</th><th >Sample</th><th>Method1</th><th>Method2</th><th>Method3</th><th>Result</th></tr>';
             results.forEach((result, index) => {
+                let maxVal = -Infinity;
+                // Find the maximum value in the current row
+                for (let key in result) {
+                    const currentValue = result[key][2];
+                    if (currentValue > maxVal) {
+                        maxVal = currentValue;
+                        maxPrint=result[key][1]
+                    }
+                   
+                }
+                console.log("greatest",maxPrint)
+                // Build table row with data
                 table += `<tr>
-                    <td>${index + 1}</td>
-                    <td>${result.RF_Classifier ? result.RF_Classifier[0] : 'N/A'}</td>
-                    ${formatClassifierResult(result.RF_Classifier)}
-                    ${formatClassifierResult(result.SVR_Classifier)}
-                    ${formatClassifierResult(result.GBC_Classifier)}
-                    ${formatRegressorResult(result.RF_Regressor)}
-                    ${formatRegressorResult(result.SVR_Regressor)}
-                    ${formatRegressorResult(result.GBR_Regressor)}
-                </tr>`;
+            <td>${index + 1}</td>
+            <td class="sample-field">${result.RF_Regressor ? result.RF_Regressor[0] : 'N/A'}</td>
+            ${formatRegressorResult(result.RF_Regressor)}
+            ${formatRegressorResult(result.SVR_Regressor)}
+            ${formatRegressorResult(result.GBR_Regressor)}
+            <td class="highValue">${maxPrint.toFixed(2)}</td>
+        </tr>`;
             });
             table += '</table>';
             document.getElementById('resultsTable').innerHTML = table;
-        }
 
-        function formatClassifierResult(result) {
-            if (!result) return '<td>N/A</td>';
-            let confidenceClass = '';
-            if (result[2] > 0.8) {
-                confidenceClass = 'high-confidence';
-            } else if (result[2] > 0.5) {
-                confidenceClass = 'med-confidence';
-            } else if (result[2] < 0.2) {
-                confidenceClass = 'low-confidence';
+            // Show/hide print button based on table appearance
+            const printButton = document.getElementById('printButton');
+            if (results.length > 0) {
+                printButton.style.display = 'block';
+            } else {
+                printButton.style.display = 'none';
             }
-            return `<td class="${confidenceClass}">Class: ${result[1]}, Confidence: ${(result[2] * 100).toFixed(2)}%</td>`;
         }
 
+
+
+  
         function formatRegressorResult(result) {
+          
+
             if (!result) return '<td>N/A</td>';
             let confidenceClass = '';
-            if (result[2] > 0.8) {
-                confidenceClass = 'high-confidence';
-            } else if (result[2] > 0.5) {
-                confidenceClass = 'med-confidence';
-            } else if (result[2] < 0.2) {
-                confidenceClass = 'low-confidence';
-            }
-            return `<td class="${confidenceClass}">Class: ${result[1]}, Confidence: ${(result[2] * 100).toFixed(2)}%</td>`;
+            //  if (result[2] >= 0.75) {
+            //      confidenceClass = 'high-confidence';
+            //  }
+            //  else if (result[2] < 0.75) {
+            //      confidenceClass = 'med-confidence';
+            //  }
+
+            return `<td >
+                 <span class="big-number small-label">${parseFloat(result[1]).toFixed(2)}</span><br>
+             <span class="percentage small-label ${confidenceClass}"><span class="std-label">Confidence:</span> ${(result[2] * 100).toFixed(0)}%</span><br>
+             <span class="class-label">Std Con: ${result[1].toFixed(4)}</span>
+         </td>`;
         }
 
-
+        displayResults();
 
         document.getElementById('file1').addEventListener('change', function () {
             const fileName = this.files[0].name;
@@ -316,6 +383,73 @@
                 removeButton.style.display = 'none';
             }
         });
+        function printTable() {
+            const headerContent = `<h1 class="text-center">Concentration Prediction Interface</h1>`;
+            const tableContent = document.getElementById('resultsTable').innerHTML;
+            const printContent = headerContent + tableContent;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>Print Table</title>');
+            printWindow.document.write('<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">');
+            printWindow.document.write('<style>');
+            printWindow.document.write(`
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        
+        .percentage {
+            top: 25px;
+            right: -95px;
+            font-size: 13px;
+            position: relative;
+        }
+
+        .class-label {
+            font-size: 12px;
+            position: relative;
+            top: 10px;
+            /* left:-20px; */
+        }
+
+        .big-number {
+            font-size: 24px;
+            font-weight: bold;
+            position: relative;
+            left:110px;
+            bottom: -20px;
+        }
+
+        .std-label {
+            color: #727272;
+            font-size: 14px;
+        }
+    `);
+            printWindow.document.write('</style></head><body>');
+            printWindow.document.write(printContent);
+            printWindow.document.write('</body></html>');
+
+            printWindow.document.close(); // Necessary for IE >= 10
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }
+
+        document.getElementById('printTableButton').addEventListener('click', function () {
+            printTable();
+        });
+
 
     </script>
 </body>
