@@ -259,9 +259,7 @@
                 </div>
 
             </div>
-            <!-- <div id="printButton" style="display: none;">
-                <button id="printTableButton" class="btn btn-primary">Print Table</button>
-            </div> -->
+           
 
         </div>
     </main>
@@ -270,100 +268,106 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById('predictionForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                document.getElementById('loader').style.display = 'block';
 
-        document.getElementById('predictionForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            document.getElementById('loader').style.display = 'block';
-
-            var formData = new FormData();
-            formData.append('file1', document.getElementById('file1').files[0]);
-            formData.append('samples', document.getElementById('samples').value);
-            //railwayapp
-            //https://hb-predicition-production.up.railway.app/predict/
-            //localhost
-            //http://localhost:8000/predict/
-            fetch('https://hb-predicition-production.up.railway.app/predict/', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loader').style.display = 'none';
-                    displayResults(data);
+                var formData = new FormData();
+                formData.append('file1', document.getElementById('file1').files[0]);
+                formData.append('samples', document.getElementById('samples').value);
+                //railwayapp
+                //https://hb-predicition-production.up.railway.app/predict/
+                //localhost
+                //http://localhost:8000/predict/
+                fetch('https://hb-predicition-production.up.railway.app/predict/', {
+                    method: 'POST',
+                    body: formData
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('loader').style.display = 'none';
-                });
-        });
-
-        function displayResults(data) {
-            var results = data.predictions;
-            var table = '<table class="table"><tr><th>#</th><th>Sample</th><th>Result</th></tr>'; // Adjusted table headers
-            results.forEach((result, index) => {
-                // Extracting the result for Method3 (GradientBoostingRegressor)
-                const method3Result = result.Method3 ? result.Method3[1] : 'N/A'; // [1] is the predicted value
-
-                // Build table row with data
-                table += `<tr>
-                <td>${index + 1}</td>
-                <td class="sample-field">${result.Method3 ? result.Method3[0] : 'N/A'}</td>
-                <td class="highValue">${parseFloat(method3Result).toFixed(2)}</td>
-            </tr>`;
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('loader').style.display = 'none';
+                        if (data && data.predictions) {
+                            displayResults(data); // Call displayResults here, after receiving the data
+                        } else {
+                            // Handle cases where the expected data is not present
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loader').style.display = 'none';
+                    });
             });
-            table += '</table>';
-            document.getElementById('resultsTable').innerHTML = table;
 
-            // Show/hide print button based on table appearance
-            const printButton = document.getElementById('printButton');
-            if (results.length > 0) {
-                printButton.style.display = 'block';
-            } else {
-                printButton.style.display = 'none';
+
+            function displayResults(data) {
+                var results = data.predictions;
+                var table = '<table class="table"><tr><th>#</th><th>Sample</th><th>Result (Method3)</th></tr>';
+                results.forEach((result, index) => {
+                    console.log(result);
+                    // Extracting the result for Method3 (previously GradientBoostingRegressor)
+                    const method3Result = result.Method3 ? result.Method3 : 'N/A'; // [1] is the predicted value
+
+                    // Build table row with data
+                    table += `<tr>
+            <td>${index + 1}</td>
+            <td class="sample-field">${result.Sample ? result.Sample : 'N/A'}</td>
+            <td class="highValue">${parseFloat(method3Result).toFixed(2)}</td>
+        </tr>`;
+                });
+                table += '</table>';
+                document.getElementById('resultsTable').innerHTML = table;
+
+                // Show/hide print button based on table appearance
+                const printButton = document.getElementById('printButton');
+                if (results.length > 0) {
+                    printButton.style.display = 'block';
+                } else {
+                    printButton.style.display = 'none';
+                }
             }
-        }
 
 
 
 
-       
-        displayResults();
 
-        document.getElementById('file1').addEventListener('change', function () {
-            const fileName = this.files[0].name;
-            document.querySelector('.custom-file-label').textContent = fileName;
-            document.querySelector('.remove-file').style.display = 'inline-block';
-            document.getElementById('selectedFileName').textContent = fileName;
-        });
 
-        document.querySelector('.remove-file').addEventListener('click', function () {
-            document.getElementById('file1').value = '';
-            document.querySelector('.custom-file-label').textContent = 'Choose file';
-            document.querySelector('.remove-file').style.display = 'none';
-            document.getElementById('selectedFileName').textContent = '';
-        });
 
-        document.getElementById('file1').addEventListener('change', function () {
-            const hasFile = this.files.length > 0;
-            document.querySelector('.custom-file-label').textContent = hasFile ? this.files[0].name : 'Choose file';
-            const removeButton = document.querySelector('.remove-file');
-            if (hasFile) {
-                removeButton.style.display = 'inline-block';
-                removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Replace with the trash/delete icon
-            } else {
-                removeButton.style.display = 'none';
-            }
-        });
-        function printTable() {
-            const headerContent = `<h1 class="text-center">Concentration Prediction Interface</h1>`;
-            const tableContent = document.getElementById('resultsTable').innerHTML;
-            const printContent = headerContent + tableContent;
+            document.getElementById('file1').addEventListener('change', function () {
+                const fileName = this.files[0].name;
+                document.querySelector('.custom-file-label').textContent = fileName;
+                document.querySelector('.remove-file').style.display = 'inline-block';
+                document.getElementById('selectedFileName').textContent = fileName;
+            });
 
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write('<html><head><title>Print Table</title>');
-            printWindow.document.write('<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">');
-            printWindow.document.write('<style>');
-            printWindow.document.write(`
+            document.querySelector('.remove-file').addEventListener('click', function () {
+                document.getElementById('file1').value = '';
+                document.querySelector('.custom-file-label').textContent = 'Choose file';
+                document.querySelector('.remove-file').style.display = 'none';
+                document.getElementById('selectedFileName').textContent = '';
+            });
+
+            document.getElementById('file1').addEventListener('change', function () {
+                const hasFile = this.files.length > 0;
+                document.querySelector('.custom-file-label').textContent = hasFile ? this.files[0].name : 'Choose file';
+                const removeButton = document.querySelector('.remove-file');
+                if (hasFile) {
+                    removeButton.style.display = 'inline-block';
+                    removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Replace with the trash/delete icon
+                } else {
+                    removeButton.style.display = 'none';
+                }
+            });
+            function printTable() {
+                const headerContent = `<h1 class="text-center">Concentration Prediction Interface</h1>`;
+                const tableContent = document.getElementById('resultsTable').innerHTML;
+                const printContent = headerContent + tableContent;
+
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write('<html><head><title>Print Table</title>');
+                printWindow.document.write('<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">');
+                printWindow.document.write('<style>');
+                printWindow.document.write(`
         body {
             font-family: 'Roboto', sans-serif;
             margin: 20px;
@@ -407,21 +411,21 @@
             font-size: 14px;
         }
     `);
-            printWindow.document.write('</style></head><body>');
-            printWindow.document.write(printContent);
-            printWindow.document.write('</body></html>');
+                printWindow.document.write('</style></head><body>');
+                printWindow.document.write(printContent);
+                printWindow.document.write('</body></html>');
 
-            printWindow.document.close(); // Necessary for IE >= 10
-            printWindow.focus();
-            printWindow.print();
-            printWindow.close();
-        }
+                printWindow.document.close(); // Necessary for IE >= 10
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            }
 
-        document.getElementById('printTableButton').addEventListener('click', function () {
-            printTable();
+            document.getElementById('printTableButton').addEventListener('click', function () {
+                printTable();
+            });
+
         });
-
-
     </script>
 </body>
 
