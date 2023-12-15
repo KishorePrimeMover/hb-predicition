@@ -122,7 +122,7 @@
             font-size: 12px;
         }
 
-       
+
 
         .highValue {
             color: green;
@@ -136,7 +136,7 @@
         .sample-field {
             font-size: 24px;
             font-weight: bold;
-         
+
         }
 
         @media (max-width: 576px) {
@@ -155,8 +155,11 @@
                 font-size: 12px;
             }
         }
-        .small-font{
-            font-size: 12px; color: #888; display: block;
+
+        .small-font {
+            font-size: 12px;
+            color: #888;
+            display: block;
         }
     </style>
 </head>
@@ -246,31 +249,31 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        const mockData={
-    "predictions": [
-        {
-            "Sample": 19822.0,
-            "Method3": 12.000441711383838
-        },
-        {
-            "Sample": 15479.0,
-            "Method3": 15.99991296168055
-        },
-        {
-            "Sample": 24863.0,
-            "Method3": 8.000102214137462
-        },
-        {
-            "Sample": 12721.0,
-            "Method3": 20.99897528755054
-        },
-        {
-            "Sample": 28816.0,
-            "Method3": 6.0001292642555155
+        const mockData = {
+            "predictions": [
+                {
+                    "Sample": 19822.0,
+                    "Method3": 12.000441711383838
+                },
+                {
+                    "Sample": 15479.0,
+                    "Method3": 15.99991296168055
+                },
+                {
+                    "Sample": 24863.0,
+                    "Method3": 8.000102214137462
+                },
+                {
+                    "Sample": 12721.0,
+                    "Method3": 20.99897528755054
+                },
+                {
+                    "Sample": 28816.0,
+                    "Method3": 6.0001292642555155
+                }
+            ]
         }
-    ]
-}
-        
+
         document.addEventListener('DOMContentLoaded', (event) => {
             document.getElementById('predictionForm').addEventListener('submit', function (event) {
                 event.preventDefault();
@@ -305,21 +308,20 @@
 
             function displayResults(data) {
                 var results = data.predictions;
-                var table = '<table class="table"><tr><th>S.No</th><th>Sample</th><th>Result (Method3)</th></tr>';
+                var table = '<table class="table"><tr><th>S.No</th><th>Sample</th><th>Result (Method1)</th><th>Result (Method2)</th></tr>';
                 results.forEach((result, index) => {
-                    console.log(result);
                     // Extracting the result for Method3 (previously GradientBoostingRegressor)
-                    const method3Result = result.Method3 ? result.Method3 : 'N/A'; // [1] is the predicted value
+                    const method3Result = result.Method1 ? result.Method1 : 'N/A';
+                    // Extracting the result for the Polynomial method
+                    const polyResult = result.Method2 ? result.Method2 : 'N/A';
 
                     // Build table row with data
                     table += `<tr>
-                        <td>${index + 1}</td>
-            <td class="sample-field">${result.Sample ? result.Sample : 'N/A'}</td>
-            <td class="highValue">
-                ${parseFloat(method3Result).toFixed(2)} 
-                <span class="small-font">Concentration:${method3Result}</span>
-            </td>
-        </tr>`;
+                <td>${index + 1}</td>
+                <td class="sample-field">${result.Sample ? result.Sample : 'N/A'}</td>
+                <td class="highValue">${parseFloat(method3Result).toFixed(2)} <span class="small-font">Concentration:${method3Result}</span></td>
+                <td class="highValue">${parseFloat(polyResult).toFixed(2)} <span class="small-font">Concentration:${polyResult}</span></td>
+            </tr>`;
                 });
                 table += '</table>';
                 document.getElementById('resultsTable').innerHTML = table;
@@ -331,22 +333,22 @@
                     printButton.style.display = 'none';
                 }
             }
-          displayResults(mockData)
+            displayResults(mockData)
             document.getElementById('file1').addEventListener('change', function () {
-            const fileName = this.files[0] ? this.files[0].name : 'Choose file';
-            document.querySelector('.custom-file-label').textContent = fileName;
-            const removeButton = document.querySelector('.remove-file');
-            removeButton.style.display = this.files[0] ? 'inline-block' : 'none';
-        });
+                const fileName = this.files[0] ? this.files[0].name : 'Choose file';
+                document.querySelector('.custom-file-label').textContent = fileName;
+                const removeButton = document.querySelector('.remove-file');
+                removeButton.style.display = this.files[0] ? 'inline-block' : 'none';
+            });
 
 
 
-        document.querySelector('.remove-file').addEventListener('click', function () {
-            const fileInput = document.getElementById('file1');
-            fileInput.value = '';
-            document.querySelector('.custom-file-label').textContent = 'Choose file';
-            this.style.display = 'none';
-        });
+            document.querySelector('.remove-file').addEventListener('click', function () {
+                const fileInput = document.getElementById('file1');
+                fileInput.value = '';
+                document.querySelector('.custom-file-label').textContent = 'Choose file';
+                this.style.display = 'none';
+            });
 
             document.getElementById('file1').addEventListener('change', function () {
                 const hasFile = this.files.length > 0;
@@ -359,17 +361,17 @@
                     removeButton.style.display = 'none';
                 }
             });
-          
-            function printTable() {
-        const headerContent = `<h3 class="text-center">Concentration Prediction Interface</h3>`;
-        const tableContent = document.getElementById('resultsTable').innerHTML;
-        const printContent = headerContent + tableContent;
 
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write('<html><head><title>Edhaa Inovations</title>');
-        printWindow.document.write('<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">');
-        printWindow.document.write('<style>');
-        printWindow.document.write(`
+            function printTable() {
+                const headerContent = `<h3 class="text-center">Concentration Prediction Interface</h3>`;
+                const tableContent = document.getElementById('resultsTable').innerHTML;
+                const printContent = headerContent + tableContent;
+
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write('<html><head><title>Edhaa Inovations</title>');
+                printWindow.document.write('<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">');
+                printWindow.document.write('<style>');
+                printWindow.document.write(`
             body {
                 font-family: 'Roboto', sans-serif;
                 margin: 20px;
@@ -409,16 +411,16 @@
        
 
         `);
-        printWindow.document.write('</style></head><body>');
-        printWindow.document.write(printContent);
-        printWindow.document.write('</body></html>');
+                printWindow.document.write('</style></head><body>');
+                printWindow.document.write(printContent);
+                printWindow.document.write('</body></html>');
 
-        printWindow.document.close(); // Necessary for IE >= 10
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-    }
-    document.getElementById('printTableButton').addEventListener('click', function () {
+                printWindow.document.close(); // Necessary for IE >= 10
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            }
+            document.getElementById('printTableButton').addEventListener('click', function () {
                 printTable();
             });
 

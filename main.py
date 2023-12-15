@@ -20,9 +20,16 @@ def train_model(data: pd.DataFrame):
     # Train GradientBoostingRegressor model
     gbr_regressor = GradientBoostingRegressor(random_state=42)
     gbr_regressor.fit(X, y.replace('/',''))
-    return gbr_regressor
 
-def predict_label(data: pd.DataFrame, model, samples):
+    # Fit a polynomial curve
+    # Assuming 'reading' is the independent variable and 'label' is the dependent variable
+    polynomial_coefficients = np.polyfit(data['reading'], data['label'], 3)
+
+    # Return both the regressor and the polynomial coefficients
+    return gbr_regressor, polynomial_coefficients
+
+def predict_label(data: pd.DataFrame, models, samples):
+    gbr_regressor, poly_coeffs = models
     X = data[['reading']]
     results = []
 
@@ -30,12 +37,17 @@ def predict_label(data: pd.DataFrame, model, samples):
         if np.isscalar(sample):
             sample = np.array([[sample]])
 
-        # Directly predict the continuous value
-        predicted_value = model.predict(sample)
+        # Directly predict the continuous value using GradientBoostingRegressor
+        predicted_value_gbr = gbr_regressor.predict(sample)
+
+        # Predict using the polynomial fit
+        predicted_value_poly = np.polyval(poly_coeffs, sample)
+
         # Convert NumPy types to Python native types for JSON serialization
         sample_results = {
             "Sample": sample[0].item(),
-            "Method3": predicted_value[0].item()}
+            "Method1": predicted_value_gbr[0].item(),
+            "Method2": predicted_value_poly[0].item()}
         results.append(sample_results)
 
     return results
@@ -50,10 +62,10 @@ async def predict(file1: UploadFile = File(...), samples: str = Form(...)):
         raise HTTPException(status_code=400, detail=f"Error reading files: {e}")
 
     # Train the model
-    gbr_regressor = train_model(df1)
+    models = train_model(df1)
 
     # Get predictions
-    predictions = predict_label(df1, gbr_regressor, samples_array)
+    predictions = predict_label(df1, models, samples_array)
 
     return JSONResponse(content={"predictions": predictions})
 
