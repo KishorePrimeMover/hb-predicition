@@ -37,17 +37,31 @@ def predict_label(data: pd.DataFrame, models, samples):
         if np.isscalar(sample):
             sample = np.array([[sample]])
 
-        # Directly predict the continuous value using GradientBoostingRegressor
-        predicted_value_gbr = gbr_regressor.predict(sample)
+        # Find the corresponding label's min and max values
+        label_range = data[(data['reading'] <= int(sample)) & (int(sample) <= data['reading'])][['label']].agg(['min', 'max']).values.flatten()
 
-        # Predict using the polynomial fit
-        predicted_value_poly = np.polyval(poly_coeffs, sample)
+        predicted_value_gbr = 0  # Initialize with a default value
+        predicted_value_poly = 0
+        predicted_value = 0
+
+        if not np.isnan(label_range[0]):
+            # Sample falls within the reading range, use the label from the dataset
+            predicted_value = int(label_range[0])
+        else:
+            # Sample falls outside the reading range, use both models to predict
+            predicted_value_gbr = gbr_regressor.predict(sample)[0].item()
+            predicted_value_poly = np.polyval(poly_coeffs, sample)[0].item()
+
+            # Use the average of both predictions as the final prediction
+            predicted_value = (predicted_value_gbr + predicted_value_poly) // 2
 
         # Convert NumPy types to Python native types for JSON serialization
         sample_results = {
             "Sample": sample[0].item(),
-            "Method1": predicted_value_gbr[0].item(),
-            "Method2": predicted_value_poly[0].item()}
+            "Method1": predicted_value_gbr,
+            "Method2": predicted_value_poly,
+            "Method3": predicted_value
+        }
         results.append(sample_results)
 
     return results
